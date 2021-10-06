@@ -1,4 +1,5 @@
 const mongoose = require("mongoose"); // для подключения к БД
+const User = require("./user"); // импортируем модель user
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -12,12 +13,13 @@ const cardSchema = new mongoose.Schema({
     required: true,
   },
   owner: {
-    type: mongoose.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
   },
   likes: [
     {
-      type: mongoose.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
       default: [],
     },

@@ -1,11 +1,11 @@
-const User = require("../models/user");
+const router = require("express").Router(); // создали роутер
+const { getUsers, getUserById, createUser } = require("../controllers/users"); // импортируем контроллеры
 
-router.get("/users/", (req, res) => {
-  User.find({})
-    .then((users) => res.send({ data: users }))
-    .catch((err) => res.status(500).send({ message: "Произошла ошибка" }));
-});
+router.get("/", getUsers);
+router.get("/:userId", getUserById);
+router.post("/", createUser);
 
+<<<<<<< HEAD
 router.get("/users/:userId", (req, res) => {
   User.findById(req.params.id)
     .then((user) => res.send({ data: user }))
@@ -22,3 +22,6 @@ router.post("/users", (req, res) => {
 
 // patchProfile,
 // patchAvatar
+=======
+module.exports = router; // экспортировали роутер
+>>>>>>> main

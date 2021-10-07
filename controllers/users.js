@@ -21,3 +21,37 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => res.status(500).send({ message: "Произошла ошибка" }));
 };
+
+module.exports.updateProfile = (req, res) => {
+  const { name, about } = req.body;
+  const owner = req.user._id;
+
+  User.findByIdAndUpdate(
+    req.user._id, // первый параметр - id пользователя
+    { name, about }, // что обновляем
+    {
+      new: true, // обработчик then получит на вход обновлённую запись
+      runValidators: true, // данные будут валидированы перед изменением
+      upsert: true, // если пользователь не найден, он будет создан
+    }
+  )
+    .then((user) => res.send({ data: user }))
+    .catch((err) => res.status(500).send({ message: "Произошла ошибка" }));
+};
+
+module.exports.updateAvatar = (req, res) => {
+  const { avatar } = req.body;
+  const owner = req.user._id;
+
+  User.findByIdAndUpdate(
+    req.user._id, // первый параметр - id пользователя
+    { avatar }, // что обновляем
+    {
+      new: true, // обработчик then получит на вход обновлённую запись
+      runValidators: true, // данные будут валидированы перед изменением
+      upsert: true, // если пользователь не найден, он будет создан
+    }
+  )
+    .then((user) => res.send({ data: user }))
+    .catch((err) => res.status(500).send({ message: "Произошла ошибка" }));
+};

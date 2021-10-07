@@ -3,14 +3,14 @@ const {
   getCards,
   createCard,
   deleteCardById,
-  patchProfile,
-  patchAvatar,
+  likeCard,
+  dislikeCard,
 } = require("../controllers/cards"); // импортируем контроллеры
 
 router.get("/", getCards);
 router.post("/", createCard);
 router.delete("/:cardId", deleteCardById);
-router.patch("/me", patchProfile);
-router.patch("/me/avatar", patchAvatar);
+router.put("/:cardId/likes", likeCard);
+router.delete("/:cardId/likes", dislikeCard);
 
 module.exports = router; // экспортировали роутер

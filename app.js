@@ -38,7 +38,7 @@ app.use(express.static(path.join(__dirname, "public"))); // теперь кли�
 // временный костыль по ТЗ
 app.use((req, res, next) => {
   req.user = {
-    _id: "615c7d2fd1e07a1d59a48cb9111",
+    _id: "615c7d2fd1e07a1d59a48cb9",
   };
   next();
 });

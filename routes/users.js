@@ -5,7 +5,6 @@ router.get("/", getUsers);
 router.get("/:userId", getUserById);
 router.post("/", createUser);
 
-<<<<<<< HEAD
 router.get("/users/:userId", (req, res) => {
   User.findById(req.params.id)
     .then((user) => res.send({ data: user }))
@@ -22,6 +21,3 @@ router.post("/users", (req, res) => {
 
 // patchProfile,
 // patchAvatar
-=======
-module.exports = router; // экспортировали роутер
->>>>>>> main

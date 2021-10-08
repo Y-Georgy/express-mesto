@@ -20,13 +20,18 @@ module.exports.getUserById = (req, res) => {
 
   User.findById(userId)
     .then((user) => {
-      res.send({ data: user });
+      if (user) {
+        return res.send({ data: user });
+      }
+      return res.status(ERROR_CODE_404).send({
+        message: 'Пользователь по указанному _id не найден',
+      });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res
-          .status(ERROR_CODE_404)
-          .send({ message: 'Пользователь по указанному _id не найден' });
+          .status(ERROR_CODE_400)
+          .send({ message: 'Передан некорректный id пользователя' });
       }
       return res
         .status(ERROR_CODE_500)
@@ -58,11 +63,15 @@ module.exports.updateProfile = (req, res) => {
     {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
-      upsert: true, // если пользователь не найден, он будет создан
     },
   )
     .then((user) => {
-      res.send({ data: user });
+      if (user) {
+        return res.send({ data: user });
+      }
+      return res.status(ERROR_CODE_404).send({
+        message: 'Пользователь по указанному _id не найден',
+      });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -71,8 +80,8 @@ module.exports.updateProfile = (req, res) => {
         });
       }
       if (err.name === 'CastError') {
-        return res.status(ERROR_CODE_404).send({
-          message: 'Пользователь с указанным _id не найден',
+        return res.status(ERROR_CODE_400).send({
+          message: 'Передан некорректный id пользователя',
         });
       }
       return res.status(ERROR_CODE_500).send({ message: 'Произошла ошибка' });
@@ -88,10 +97,16 @@ module.exports.updateAvatar = (req, res) => {
     {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
-      upsert: true, // если пользователь не найден, он будет создан
     },
   )
-    .then((user) => res.send({ data: user }))
+    .then((user) => {
+      if (user) {
+        return res.send({ data: user });
+      }
+      return res.status(ERROR_CODE_404).send({
+        message: 'Пользователь по указанному _id не найден',
+      });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(ERROR_CODE_400).send({
@@ -99,8 +114,8 @@ module.exports.updateAvatar = (req, res) => {
         });
       }
       if (err.name === 'CastError') {
-        return res.status(ERROR_CODE_404).send({
-          message: 'Пользователь с указанным _id не найден',
+        return res.status(ERROR_CODE_400).send({
+          message: 'Передан некорректный id пользователя',
         });
       }
       return res.status(ERROR_CODE_500).send({ message: 'Произошла ошибка' });

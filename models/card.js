@@ -1,5 +1,4 @@
-const mongoose = require("mongoose"); // для подключения к БД
-const User = require("./user"); // импортируем модель user
+const mongoose = require('mongoose'); // для подключения к БД
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -14,7 +13,7 @@ const cardSchema = new mongoose.Schema({
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
   likes: [
@@ -30,4 +29,4 @@ const cardSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("card", cardSchema);
+module.exports = mongoose.model('card', cardSchema);

@@ -1,12 +1,13 @@
 # Georgy Y
 
-# express-mesto
+### express-mesto
+
 Проект "Mesto" фронтенд и бэкенд
 
 #### Технологии
 
 ```
-- express
+- Express
 - JavaScript
 
 ```

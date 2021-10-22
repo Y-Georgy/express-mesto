@@ -1,4 +1,7 @@
+const bcrypt = require('bcryptjs'); // установленный модуль для хеширования пароля
+const validator = require('validator');
 const User = require('../models/user'); // импортируем модель
+
 const {
   ERROR_CODE_400,
   ERROR_CODE_404,
@@ -7,11 +10,16 @@ const {
 
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.send({ data: users }))
+    .then((users) => res
+      .send({
+        data: users,
+      }))
     .catch((err) => {
       // eslint-disable-next-line no-console
       console.log(err);
-      res.status(ERROR_CODE_500).send({ message: 'Произошла ошибка' });
+      res.status(ERROR_CODE_500).send({
+        message: 'Произошла ошибка',
+      });
     });
 };
 
@@ -21,7 +29,9 @@ module.exports.getUserById = (req, res) => {
   User.findById(userId)
     .then((user) => {
       if (user) {
-        return res.send({ data: user });
+        return res.send({
+          data: user,
+        });
       }
       return res.status(ERROR_CODE_404).send({
         message: 'Пользователь по указанному _id не найден',
@@ -29,28 +39,54 @@ module.exports.getUserById = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res
-          .status(ERROR_CODE_400)
-          .send({ message: 'Передан некорректный id пользователя' });
+        return res.status(ERROR_CODE_400).send({
+          message: 'Передан некорректный id пользователя',
+        });
       }
-      return res
-        .status(ERROR_CODE_500)
-        .send({ message: 'Произошла ошибка сервера' });
+      return res.status(ERROR_CODE_500).send({
+        message: 'Произошла ошибка сервера',
+      });
     });
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
+  bcrypt
+    .hash(password, 10) // хешируем пароль
+    .then((hash) => {
+      if (!validator.isEmail('foo@bar.com')) {
+        return res.status(ERROR_CODE_400).send({
+          message: 'Передан некорректный e-mail',
+        });
+      }
+      return User.create({
+        name,
+        about,
+        avatar,
+        email,
+        password: hash, // вместо пароля передаем его хеш
+      });
+    })
+    .then((user) => res
+      .send({
+        data: user,
+      }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(ERROR_CODE_400).send({
           message: 'Переданы некорректные данные при создании пользователя',
         });
       }
-      return res.status(ERROR_CODE_500).send({ message: 'Произошла ошибка' });
+      return res.status(ERROR_CODE_500).send({
+        message: 'Произошла ошибка',
+      });
     });
 };
 
@@ -59,7 +95,10 @@ module.exports.updateProfile = (req, res) => {
 
   User.findByIdAndUpdate(
     req.user._id, // первый параметр - id пользователя
-    { name, about }, // что обновляем
+    {
+      name,
+      about,
+    }, // что обновляем
     {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
@@ -67,7 +106,9 @@ module.exports.updateProfile = (req, res) => {
   )
     .then((user) => {
       if (user) {
-        return res.send({ data: user });
+        return res.send({
+          data: user,
+        });
       }
       return res.status(ERROR_CODE_404).send({
         message: 'Пользователь по указанному _id не найден',
@@ -84,7 +125,9 @@ module.exports.updateProfile = (req, res) => {
           message: 'Передан некорректный id пользователя',
         });
       }
-      return res.status(ERROR_CODE_500).send({ message: 'Произошла ошибка' });
+      return res.status(ERROR_CODE_500).send({
+        message: 'Произошла ошибка',
+      });
     });
 };
 
@@ -93,7 +136,9 @@ module.exports.updateAvatar = (req, res) => {
 
   User.findByIdAndUpdate(
     req.user._id, // первый параметр - id пользователя
-    { avatar }, // что обновляем
+    {
+      avatar,
+    }, // что обновляем
     {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
@@ -101,7 +146,9 @@ module.exports.updateAvatar = (req, res) => {
   )
     .then((user) => {
       if (user) {
-        return res.send({ data: user });
+        return res.send({
+          data: user,
+        });
       }
       return res.status(ERROR_CODE_404).send({
         message: 'Пользователь по указанному _id не найден',
@@ -118,6 +165,8 @@ module.exports.updateAvatar = (req, res) => {
           message: 'Передан некорректный id пользователя',
         });
       }
-      return res.status(ERROR_CODE_500).send({ message: 'Произошла ошибка' });
+      return res.status(ERROR_CODE_500).send({
+        message: 'Произошла ошибка',
+      });
     });
 };

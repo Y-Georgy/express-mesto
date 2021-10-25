@@ -8,11 +8,7 @@ router.use('/users', userRouter);
 router.use('/cards', cardRouter);
 router.use((req, res, next) => {
   // res.status(ERROR_CODE_404).send({ message: 'Ошибка - некорректный запрос' });
-  try {
-    throw new NotFoundError('Ошибка - некорректный запрос');
-  } catch (err) {
-    next(err);
-  }
+  next(new NotFoundError('Ошибка - некорректный запрос'));
 });
 
 module.exports = router;

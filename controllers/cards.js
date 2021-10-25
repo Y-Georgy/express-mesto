@@ -31,12 +31,11 @@ module.exports.createCard = (req, res, next) => {
         // return res.status(ERROR_CODE_400).send({
         //   message: 'Переданы некорректные данные при создании карточки',
         // });
-        throw new IncorrectDataError('Переданы некорректные данные при создании карточки');
+        next(new IncorrectDataError('Переданы некорректные данные при создании карточки'));
       }
       // return res.status(ERROR_CODE_500).send({ message: 'Произошла ошибка' });
       next(err);
-    })
-    .catch(next);
+    });
 };
 
 module.exports.deleteCardById = (req, res, next) => {
@@ -64,15 +63,14 @@ module.exports.deleteCardById = (req, res, next) => {
             res.send({ data: deletedCard });
           })
           .catch((err) => {
-            if (err.statusCode === 404) {
-              // return res.status(err.statusCode).send({ message: err.message });
-              next(err);
-            }
+            // if (err.statusCode === 404) {
+            //   return res.status(err.statusCode).send({ message: err.message });
+            // }
             if (err.name === 'CastError') {
               // return res.status(ERROR_CODE_400).send({
               //   message: 'Передан некорректный id при удалении карточки',
               // });
-              throw new IncorrectDataError('Передан некорректный id при удалении карточки');
+              next(new IncorrectDataError('Передан некорректный id при удалении карточки'));
             }
             // return res.status(ERROR_CODE_500).send({ message: 'Произошла ошибка' });
             next(err);
@@ -81,10 +79,9 @@ module.exports.deleteCardById = (req, res, next) => {
         // return res.status(ERROR_CODE_403).send({
         //   message: 'У Вас нет прав на удаление карточки с этим id',
         // });
-        throw new ForbiddenDataError('У Вас нет прав на удаление карточки с этим id');
+        next(new ForbiddenDataError('У Вас нет прав на удаление карточки с этим id'));
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {
@@ -107,12 +104,11 @@ module.exports.likeCard = (req, res, next) => {
         // return res.status(ERROR_CODE_400).send({
         //   message: 'Переданы некорректные данные для постановки/снятии лайка',
         // });
-        throw new IncorrectDataError('Переданы некорректные данные для постановки/снятии лайка');
+        next(new IncorrectDataError('Переданы некорректные данные для постановки/снятии лайка'));
       }
       // return res.status(ERROR_CODE_500).send({ message: 'Произошла ошибка' });
       next(err);
-    })
-    .catch(next);
+    });
 };
 
 module.exports.dislikeCard = (req, res, next) => {
@@ -135,10 +131,9 @@ module.exports.dislikeCard = (req, res, next) => {
         // return res.status(ERROR_CODE_400).send({
         //   message: 'Переданы некорректные данные для постановки/снятии лайка',
         // });
-        throw new IncorrectDataError('Переданы некорректные данные для постановки/снятии лайка');
+        next(new IncorrectDataError('Переданы некорректные данные для постановки/снятии лайка'));
       }
       // return res.status(ERROR_CODE_500).send({ message: 'Произошла ошибка' });
       next(err);
-    })
-    .catch(next);
+    });
 };

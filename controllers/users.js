@@ -29,17 +29,18 @@ module.exports.getUser = (req, res, next) => {
       // });
       throw new NotFoundError('Пользователь по указанному _id не найден');
     })
-    // .catch((err) => {
-    //   if (err.name === 'CastError') {
-    //     return res.status(ERROR_CODE_400).send({
-    //       message: 'Передан некорректный id пользователя',
-    //     });
-    //   }
-    //   return res.status(ERROR_CODE_500).send({
-    //     message: 'Произошла ошибка сервера',
-    //   });
-    // });
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        // return res.status(ERROR_CODE_400).send({
+        //   message: 'Передан некорректный id пользователя',
+        // });
+        next(new IncorrectDataError('Передан некорректный id пользователя'));
+      }
+      // return res.status(ERROR_CODE_500).send({
+      //   message: 'Произошла ошибка сервера',
+      // });
+      next(err);
+    });
 };
 
 module.exports.getUsers = (req, res, next) => {
@@ -73,17 +74,18 @@ module.exports.getUserById = (req, res, next) => {
       // });
       throw new NotFoundError('Пользователь по указанному _id не найден');
     })
-    // .catch((err) => {
-    //   if (err.name === 'CastError') {
-    //     return res.status(ERROR_CODE_400).send({
-    //       message: 'Передан некорректный id пользователя',
-    //     });
-    //   }
-    //   return res.status(ERROR_CODE_500).send({
-    //     message: 'Произошла ошибка сервера',
-    //   });
-    // });
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        // return res.status(ERROR_CODE_400).send({
+        //   message: 'Передан некорректный id пользователя',
+        // });
+        next(new IncorrectDataError('Передан некорректный id пользователя'));
+      }
+      // return res.status(ERROR_CODE_500).send({
+      //   message: 'Произошла ошибка сервера',
+      // });
+      next(err);
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -116,17 +118,18 @@ module.exports.createUser = (req, res, next) => {
       .send({
         data: user,
       }))
-    // .catch((err) => {
-    //   if (err.name === 'ValidationError') {
-    //     return res.status(ERROR_CODE_400).send({
-    //       message: 'Переданы некорректные данные при создании пользователя',
-    //     });
-    //   }
-    //   return res.status(ERROR_CODE_500).send({
-    //     message: 'Произошла ошибка',
-    //   });
-    // });
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        // return res.status(ERROR_CODE_400).send({
+        //   message: 'Переданы некорректные данные при создании пользователя',
+        // });
+        next(new IncorrectDataError('Передан некорректный e-mail'));
+      }
+      // return res.status(ERROR_CODE_500).send({
+      //   message: 'Произошла ошибка',
+      // });
+      next(err);
+    });
 };
 
 module.exports.updateProfile = (req, res, next) => {
@@ -159,20 +162,19 @@ module.exports.updateProfile = (req, res, next) => {
         // return res.status(ERROR_CODE_400).send({
         //   message: 'Переданы некорректные данные при обновлении профиля',
         // });
-        throw new IncorrectDataError('Переданы некорректные данные при обновлении профиля');
+        next(new IncorrectDataError('Переданы некорректные данные при обновлении профиля'));
       }
       if (err.name === 'CastError') {
         // return res.status(ERROR_CODE_400).send({
         //   message: 'Передан некорректный id пользователя',
         // });
-        throw new IncorrectDataError('Передан некорректный id пользователя');
+        next(new IncorrectDataError('Передан некорректный id пользователя'));
       }
       // return res.status(ERROR_CODE_500).send({
       //   message: 'Произошла ошибка',
       // });
       next(err);
-    })
-    .catch(next);
+    });
 };
 
 module.exports.updateAvatar = (req, res, next) => {
@@ -204,20 +206,19 @@ module.exports.updateAvatar = (req, res, next) => {
         // return res.status(ERROR_CODE_400).send({
         //   message: 'Переданы некорректные данные при обновлении аватара',
         // });
-        throw new IncorrectDataError('Переданы некорректные данные при обновлении аватара');
+        next(new IncorrectDataError('Переданы некорректные данные при обновлении аватара'));
       }
       if (err.name === 'CastError') {
         // return res.status(ERROR_CODE_400).send({
         //   message: 'Передан некорректный id пользователя',
         // });
-        throw new IncorrectDataError('Передан некорректный id пользователя');
+        next(new IncorrectDataError('Передан некорректный id пользователя'));
       }
       // return res.status(ERROR_CODE_500).send({
       //   message: 'Произошла ошибка',
       // });
       next(err);
-    })
-    .catch(next);
+    });
 };
 
 module.exports.login = (req, res, next) => {
@@ -249,7 +250,8 @@ module.exports.login = (req, res, next) => {
             // отправляем jwt в cookie для защиты от XSS-атаки.
             .cookie(jwt, token, { maxAge: 3600000 * 24 * 7, httpOnly: true })
             .end();
-        });
+        })
+        .catch(next);
     })
     // .catch(() => res.status(ERROR_CODE_500).send({
     //   message: 'Произошла ошибка',

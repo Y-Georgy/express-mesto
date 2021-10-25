@@ -23,7 +23,7 @@ module.exports.auth = (req, res, next) => {
     // return res
     //   .status(ERROR_CODE_401)
     //   .send({ message: 'Необходима авторизация' });
-    throw new UnauthorizedError('Необходима авторизация');
+    next(new UnauthorizedError('Необходима авторизация'));
   }
 
   req.user = payload; // записываем пейлоуд в объект запроса

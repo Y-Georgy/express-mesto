@@ -10,6 +10,32 @@ const {
   ERROR_CODE_500,
 } = require('./errorCodes');
 
+module.exports.getUser = (req, res) => {
+  const { userId } = req.user._id;
+
+  User.findById(userId)
+    .then((user) => {
+      if (user) {
+        return res.send({
+          data: user,
+        });
+      }
+      return res.status(ERROR_CODE_404).send({
+        message: 'Пользователь по указанному _id не найден',
+      });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(ERROR_CODE_400).send({
+          message: 'Передан некорректный id пользователя',
+        });
+      }
+      return res.status(ERROR_CODE_500).send({
+        message: 'Произошла ошибка сервера',
+      });
+    });
+};
+
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res
@@ -202,9 +228,7 @@ module.exports.login = (req, res) => {
             .end();
         });
     })
-    .catch(() => {
-      return res.status(ERROR_CODE_500).send({
-        message: 'Произошла ошибка',
-      });
-    });
+    .catch(() => res.status(ERROR_CODE_500).send({
+      message: 'Произошла ошибка',
+    }));
 };

@@ -1,6 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
 const router = require('./routes');
+const auth = require('./middlewares/auth');
+const { createUser, login } = require('./controllers/users');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -33,15 +36,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// временный костыль по ТЗ
-app.use((req, res, next) => {
-  req.user = {
-    _id: '615c7d2fd1e07a1d59a48cb9',
-  };
-  next();
-});
-
+app.use(cookieParser());
 app.use(express.json());
+
+app.post('/signup', createUser);
+app.post('/signin', login);
+
+// авторизация
+app.use(auth);
 
 app.use(router); // запускаем роутер
 

@@ -2,15 +2,19 @@ const bcrypt = require('bcryptjs'); // установленный модуль �
 const validator = require('validator');
 const jwt = require('jsonwebtoken'); // модуль для создания токенов
 const User = require('../models/user'); // импортируем модель
+const IncorrectDataError = require('../errors/incorrect-data-err');
+const UnauthorizedError = require('../errors/unauthorized-err');
+// const ForbiddenDataError = require('../errors/forbidden-err');
+const NotFoundError = require('../errors/not-found-err');
 
-const {
-  ERROR_CODE_400,
-  ERROR_CODE_401,
-  ERROR_CODE_404,
-  ERROR_CODE_500,
-} = require('./errorCodes');
+// const {
+//   ERROR_CODE_400,
+//   ERROR_CODE_401,
+//   ERROR_CODE_404,
+//   ERROR_CODE_500,
+// } = require('./errorCodes');
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   const { userId } = req.user._id;
 
   User.findById(userId)
@@ -20,38 +24,41 @@ module.exports.getUser = (req, res) => {
           data: user,
         });
       }
-      return res.status(ERROR_CODE_404).send({
-        message: 'Пользователь по указанному _id не найден',
-      });
+      // return res.status(ERROR_CODE_404).send({
+      //   message: 'Пользователь по указанному _id не найден',
+      // });
+      throw new NotFoundError('Пользователь по указанному _id не найден');
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(ERROR_CODE_400).send({
-          message: 'Передан некорректный id пользователя',
-        });
-      }
-      return res.status(ERROR_CODE_500).send({
-        message: 'Произошла ошибка сервера',
-      });
-    });
+    // .catch((err) => {
+    //   if (err.name === 'CastError') {
+    //     return res.status(ERROR_CODE_400).send({
+    //       message: 'Передан некорректный id пользователя',
+    //     });
+    //   }
+    //   return res.status(ERROR_CODE_500).send({
+    //     message: 'Произошла ошибка сервера',
+    //   });
+    // });
+    .catch(next);
 };
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res
       .send({
         data: users,
       }))
-    .catch((err) => {
-      // eslint-disable-next-line no-console
-      console.log(err);
-      res.status(ERROR_CODE_500).send({
-        message: 'Произошла ошибка',
-      });
-    });
+    // .catch((err) => {
+    //   // eslint-disable-next-line no-console
+    //   console.log(err);
+    //   res.status(ERROR_CODE_500).send({
+    //     message: 'Произошла ошибка',
+    //   });
+    // });
+    .catch(next);
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   const { userId } = req.params;
 
   User.findById(userId)
@@ -61,23 +68,25 @@ module.exports.getUserById = (req, res) => {
           data: user,
         });
       }
-      return res.status(ERROR_CODE_404).send({
-        message: 'Пользователь по указанному _id не найден',
-      });
+      // return res.status(ERROR_CODE_404).send({
+      //   message: 'Пользователь по указанному _id не найден',
+      // });
+      throw new NotFoundError('Пользователь по указанному _id не найден');
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(ERROR_CODE_400).send({
-          message: 'Передан некорректный id пользователя',
-        });
-      }
-      return res.status(ERROR_CODE_500).send({
-        message: 'Произошла ошибка сервера',
-      });
-    });
+    // .catch((err) => {
+    //   if (err.name === 'CastError') {
+    //     return res.status(ERROR_CODE_400).send({
+    //       message: 'Передан некорректный id пользователя',
+    //     });
+    //   }
+    //   return res.status(ERROR_CODE_500).send({
+    //     message: 'Произошла ошибка сервера',
+    //   });
+    // });
+    .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -90,9 +99,10 @@ module.exports.createUser = (req, res) => {
     .hash(password, 10) // хешируем пароль
     .then((hash) => {
       if (!validator.isEmail('foo@bar.com')) {
-        return res.status(ERROR_CODE_400).send({
-          message: 'Передан некорректный e-mail',
-        });
+        // return res.status(ERROR_CODE_400).send({
+        //   message: 'Передан некорректный e-mail',
+        // });
+        throw new IncorrectDataError('Передан некорректный e-mail');
       }
       return User.create({
         name,
@@ -106,19 +116,20 @@ module.exports.createUser = (req, res) => {
       .send({
         data: user,
       }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(ERROR_CODE_400).send({
-          message: 'Переданы некорректные данные при создании пользователя',
-        });
-      }
-      return res.status(ERROR_CODE_500).send({
-        message: 'Произошла ошибка',
-      });
-    });
+    // .catch((err) => {
+    //   if (err.name === 'ValidationError') {
+    //     return res.status(ERROR_CODE_400).send({
+    //       message: 'Переданы некорректные данные при создании пользователя',
+    //     });
+    //   }
+    //   return res.status(ERROR_CODE_500).send({
+    //     message: 'Произошла ошибка',
+    //   });
+    // });
+    .catch(next);
 };
 
-module.exports.updateProfile = (req, res) => {
+module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
@@ -138,28 +149,33 @@ module.exports.updateProfile = (req, res) => {
           data: user,
         });
       }
-      return res.status(ERROR_CODE_404).send({
-        message: 'Пользователь по указанному _id не найден',
-      });
+      // return res.status(ERROR_CODE_404).send({
+      //   message: 'Пользователь по указанному _id не найден',
+      // });
+      throw new NotFoundError('Пользователь по указанному _id не найден');
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(ERROR_CODE_400).send({
-          message: 'Переданы некорректные данные при обновлении профиля',
-        });
+        // return res.status(ERROR_CODE_400).send({
+        //   message: 'Переданы некорректные данные при обновлении профиля',
+        // });
+        throw new IncorrectDataError('Переданы некорректные данные при обновлении профиля');
       }
       if (err.name === 'CastError') {
-        return res.status(ERROR_CODE_400).send({
-          message: 'Передан некорректный id пользователя',
-        });
+        // return res.status(ERROR_CODE_400).send({
+        //   message: 'Передан некорректный id пользователя',
+        // });
+        throw new IncorrectDataError('Передан некорректный id пользователя');
       }
-      return res.status(ERROR_CODE_500).send({
-        message: 'Произошла ошибка',
-      });
-    });
+      // return res.status(ERROR_CODE_500).send({
+      //   message: 'Произошла ошибка',
+      // });
+      next(err);
+    })
+    .catch(next);
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -178,45 +194,52 @@ module.exports.updateAvatar = (req, res) => {
           data: user,
         });
       }
-      return res.status(ERROR_CODE_404).send({
-        message: 'Пользователь по указанному _id не найден',
-      });
+      // return res.status(ERROR_CODE_404).send({
+      //   message: 'Пользователь по указанному _id не найден',
+      // });
+      throw new NotFoundError('Пользователь по указанному _id не найден');
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(ERROR_CODE_400).send({
-          message: 'Переданы некорректные данные при обновлении аватара',
-        });
+        // return res.status(ERROR_CODE_400).send({
+        //   message: 'Переданы некорректные данные при обновлении аватара',
+        // });
+        throw new IncorrectDataError('Переданы некорректные данные при обновлении аватара');
       }
       if (err.name === 'CastError') {
-        return res.status(ERROR_CODE_400).send({
-          message: 'Передан некорректный id пользователя',
-        });
+        // return res.status(ERROR_CODE_400).send({
+        //   message: 'Передан некорректный id пользователя',
+        // });
+        throw new IncorrectDataError('Передан некорректный id пользователя');
       }
-      return res.status(ERROR_CODE_500).send({
-        message: 'Произошла ошибка',
-      });
-    });
+      // return res.status(ERROR_CODE_500).send({
+      //   message: 'Произошла ошибка',
+      // });
+      next(err);
+    })
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
         // пользователь с такой почтой не найден
-        return res.status(ERROR_CODE_401).send({
-          message: 'Неправильные почта или пароль',
-        });
+        // return res.status(ERROR_CODE_401).send({
+        //   message: 'Неправильные почта или пароль',
+        // });
+        throw new UnauthorizedError('Неправильные почта или пароль');
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
             // хеши паролей не совпали — отправляем ошибку
-            return res.status(ERROR_CODE_401).send({
-              message: 'Неправильные почта или пароль',
-            });
+            // return res.status(ERROR_CODE_401).send({
+            //   message: 'Неправильные почта или пароль',
+            // });
+            throw new UnauthorizedError('Неправильные почта или пароль');
           }
 
           // аутентификация успешна
@@ -228,7 +251,8 @@ module.exports.login = (req, res) => {
             .end();
         });
     })
-    .catch(() => res.status(ERROR_CODE_500).send({
-      message: 'Произошла ошибка',
-    }));
+    // .catch(() => res.status(ERROR_CODE_500).send({
+    //   message: 'Произошла ошибка',
+    // }));
+    .catch(next);
 };

@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const router = require('./routes');
 const auth = require('./middlewares/auth');
+const errors = require('./middlewares/errors');
+
 const { createUser, login } = require('./controllers/users');
 
 const { PORT = 3000 } = process.env;
@@ -46,6 +48,7 @@ app.post('/signin', login);
 app.use(auth);
 
 app.use(router); // запускаем роутер
+app.use(errors); // централизованная обработка ошибок
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console

@@ -1,6 +1,7 @@
 const Card = require('../models/card'); // импортируем модель
 const {
   ERROR_CODE_400,
+  ERROR_CODE_403,
   ERROR_CODE_404,
   ERROR_CODE_500,
 } = require('./errorCodes');
@@ -31,26 +32,42 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCardById = (req, res) => {
   const { cardId } = req.params;
+  const { userId } = req.user._id;
 
-  Card.findByIdAndRemove(cardId)
-    .orFail(() => {
-      const error = new Error('Карточка с указанным _id не найдена');
-      error.statusCode = 404;
-      throw error;
-    })
+  Card.findById(cardId)
+    // eslint-disable-next-line consistent-return
     .then((card) => {
-      res.send({ data: card });
-    })
-    .catch((err) => {
-      if (err.statusCode === 404) {
-        return res.status(err.statusCode).send({ message: err.message });
-      }
-      if (err.name === 'CastError') {
-        return res.status(ERROR_CODE_400).send({
-          message: 'Передан некорректный id при удалении карточки',
+      if (!card) {
+        return res.status(ERROR_CODE_404).send({
+          message: 'Карточка с указанным _id не найдена',
         });
       }
-      return res.status(ERROR_CODE_500).send({ message: 'Произошла ошибка' });
+      if (card.owner._id === userId) {
+        Card.findByIdAndRemove(cardId)
+          .orFail(() => {
+            const error = new Error('Карточка с указанным _id не найдена');
+            error.statusCode = 404;
+            throw error;
+          })
+          .then((deletedCard) => {
+            res.send({ data: deletedCard });
+          })
+          .catch((err) => {
+            if (err.statusCode === 404) {
+              return res.status(err.statusCode).send({ message: err.message });
+            }
+            if (err.name === 'CastError') {
+              return res.status(ERROR_CODE_400).send({
+                message: 'Передан некорректный id при удалении карточки',
+              });
+            }
+            return res.status(ERROR_CODE_500).send({ message: 'Произошла ошибка' });
+          });
+      } else {
+        return res.status(ERROR_CODE_403).send({
+          message: 'У Вас нет прав на удаление карточки с этим id',
+        });
+      }
     });
 };
 

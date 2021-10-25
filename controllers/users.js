@@ -3,7 +3,6 @@ const validator = require('validator');
 const jwt = require('jsonwebtoken'); // модуль для создания токенов
 const User = require('../models/user'); // импортируем модель
 
-
 const {
   ERROR_CODE_400,
   ERROR_CODE_401,

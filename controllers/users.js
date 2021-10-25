@@ -1,9 +1,12 @@
 const bcrypt = require('bcryptjs'); // установленный модуль для хеширования пароля
 const validator = require('validator');
+const jwt = require('jsonwebtoken'); // модуль для создания токенов
 const User = require('../models/user'); // импортируем модель
+
 
 const {
   ERROR_CODE_400,
+  ERROR_CODE_401,
   ERROR_CODE_404,
   ERROR_CODE_500,
 } = require('./errorCodes');
@@ -165,6 +168,42 @@ module.exports.updateAvatar = (req, res) => {
           message: 'Передан некорректный id пользователя',
         });
       }
+      return res.status(ERROR_CODE_500).send({
+        message: 'Произошла ошибка',
+      });
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        // пользователь с такой почтой не найден
+        return res.status(ERROR_CODE_401).send({
+          message: 'Неправильные почта или пароль',
+        });
+      }
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            // хеши паролей не совпали — отправляем ошибку
+            return res.status(ERROR_CODE_401).send({
+              message: 'Неправильные почта или пароль',
+            });
+          }
+
+          // аутентификация успешна
+          const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+          // return res.send({ jwt: token });
+          return res
+            // отправляем jwt в cookie для защиты от XSS-атаки.
+            .cookie(jwt, token, { maxAge: 3600000 * 24 * 7, httpOnly: true })
+            .end();
+        });
+    })
+    .catch(() => {
       return res.status(ERROR_CODE_500).send({
         message: 'Произошла ошибка',
       });

@@ -125,6 +125,9 @@ module.exports.createUser = (req, res, next) => {
         // });
         next(new IncorrectDataError('Передан некорректный e-mail'));
       }
+      if (err.name === 'MongoError' && err.code === 11000) {
+        next(new IncorrectDataError('Пользователь с таким e-mail уже существует'));
+      }
       // return res.status(ERROR_CODE_500).send({
       //   message: 'Произошла ошибка',
       // });

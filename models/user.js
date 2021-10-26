@@ -1,4 +1,5 @@
 const mongoose = require('mongoose'); // для подключения к БД
+const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -15,6 +16,10 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
+    validate: {
+      validator: (url) => validator.isUrl(url),
+      message: 'Ссылка не валидна',
+    },
     default:
       'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
@@ -22,6 +27,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    validate: {
+      validator: (email) => validator.isEmail(email),
+      message: 'Email не валиден',
+    },
   },
   password: {
     type: String,

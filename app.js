@@ -6,6 +6,7 @@ const { errors } = require('celebrate'); // для обработки ошибо
 const router = require('./routes');
 const auth = require('./middlewares/auth');
 const centralizedErrors = require('./middlewares/centralizedErrors');
+const { isValidUrl } = require('./utils/methods');
 
 const { createUser, login } = require('./controllers/users');
 
@@ -48,7 +49,7 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string(),
+    avatar: Joi.string().custom(isValidUrl),
     email: Joi.string().required().email(),
     password: Joi.string().required().pattern(new RegExp('^[a-zA-Z0-9]{8,}$')),
   }),

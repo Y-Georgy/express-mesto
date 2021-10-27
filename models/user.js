@@ -16,12 +16,12 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    validate: {
-      validator: (url) => validator.isUrl(url),
-      message: 'Ссылка не валидна',
-    },
     default:
       'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    validate: {
+      validator: (url) => validator.isURL(url),
+      message: 'Ссылка не валидна',
+    },
   },
   email: {
     type: String,

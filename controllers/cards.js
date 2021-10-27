@@ -25,14 +25,15 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCardById = (req, res, next) => {
   const { cardId } = req.params;
-  const { userId } = req.user._id;
+  const userId = req.user._id;
 
   Card.findById(cardId)
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Карточка с указанным _id не найдена');
       }
-      if (card.owner._id === userId) {
+
+      if (card.owner._id.toString() === userId) {
         Card.findByIdAndRemove(cardId)
           .orFail(() => {
             throw new NotFoundError('Карточка с указанным _id не найдена');
@@ -47,7 +48,7 @@ module.exports.deleteCardById = (req, res, next) => {
             next(err);
           });
       } else {
-        next(new ForbiddenDataError('У Вас нет прав на удаление карточки с этим id'));
+        next(new ForbiddenDataError('У Вас нет прав на удаление этой карточки'));
       }
     });
 };

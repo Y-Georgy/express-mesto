@@ -9,13 +9,13 @@ const {
 } = require('../controllers/users'); // импортируем контроллеры
 
 router.get('/', getUsers);
+router.get('/me', getUser);
 router.get('/:userId', celebrate({
   // валидируем параметры
   params: Joi.object().keys({
-    userId: Joi.string().required().alphanum().length(24),
+    userId: Joi.string().required().hex().length(24),
   }),
 }), getUserById);
-router.get('/me', getUser);
 router.patch('/me', celebrate({
   // валидируем body
   body: Joi.object().keys({

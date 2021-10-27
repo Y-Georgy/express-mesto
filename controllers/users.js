@@ -2,12 +2,14 @@ const bcrypt = require('bcryptjs'); // установленный модуль �
 const validator = require('validator');
 const jwt = require('jsonwebtoken'); // модуль для создания токенов
 const User = require('../models/user'); // импортируем модель
+
+const { JWT_SECRET = 'some-secret-key' } = process.env;
 const IncorrectDataError = require('../errors/incorrect-data-err');
 const UnauthorizedError = require('../errors/unauthorized-err');
 const NotFoundError = require('../errors/not-found-err');
 
 module.exports.getUser = (req, res, next) => {
-  const { userId } = req.user._id;
+  const userId = req.user._id;
 
   User.findById(userId)
     .then((user) => {
@@ -67,7 +69,7 @@ module.exports.createUser = (req, res, next) => {
   bcrypt
     .hash(password, 10) // хешируем пароль
     .then((hash) => {
-      if (!validator.isEmail('foo@bar.com')) {
+      if (!validator.isEmail(email)) {
         throw new IncorrectDataError('Передан некорректный e-mail');
       }
       return User.create({
@@ -78,15 +80,17 @@ module.exports.createUser = (req, res, next) => {
         password: hash, // вместо пароля передаем его хеш
       });
     })
-    .then((user) => res
-      .send({
-        data: user,
-      }))
+    .then((user) => {
+      res
+        .send({
+          data: user,
+        });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new IncorrectDataError('Передан некорректный e-mail'));
+        next(new IncorrectDataError(err.message));
       }
-      if (err.name === 'MongoError' && err.code === 11000) {
+      if (err.name === 'MongoServerError' && err.code === 11000) {
         next(new IncorrectDataError('Пользователь с таким e-mail уже существует'));
       }
       next(err);
@@ -175,11 +179,11 @@ module.exports.login = (req, res, next) => {
           }
 
           // аутентификация успешна
-          const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+          const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
           // return res.send({ jwt: token });
           return res
             // отправляем jwt в cookie для защиты от XSS-атаки.
-            .cookie(jwt, token, { maxAge: 3600000 * 24 * 7, httpOnly: true })
+            .cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true })
             .end();
         })
         .catch(next);

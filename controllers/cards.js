@@ -29,8 +29,9 @@ module.exports.deleteCardById = (req, res, next) => {
 
   Card.findById(cardId)
     .then((card) => {
+      // console.log('card', card);
       if (!card) {
-        throw new NotFoundError('Карточка с указанным _id не найдена');
+        next(new NotFoundError('Карточка с указанным _id не найдена'));
       }
 
       if (card.owner._id.toString() === userId) {
@@ -50,7 +51,8 @@ module.exports.deleteCardById = (req, res, next) => {
       } else {
         next(new ForbiddenDataError('У Вас нет прав на удаление этой карточки'));
       }
-    });
+    })
+    .catch(next);
 };
 
 module.exports.likeCard = (req, res, next) => {

@@ -7,6 +7,7 @@ const { JWT_SECRET = 'some-secret-key' } = process.env;
 const IncorrectDataError = require('../errors/incorrect-data-err');
 const UnauthorizedError = require('../errors/unauthorized-err');
 const NotFoundError = require('../errors/not-found-err');
+const ConflictError = require('../errors/сonflict-err');
 
 module.exports.getUser = (req, res, next) => {
   const userId = req.user._id;
@@ -81,9 +82,16 @@ module.exports.createUser = (req, res, next) => {
       });
     })
     .then((user) => {
+      const dataUser = {
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+        _id: user._id,
+      };
       res
         .send({
-          data: user,
+          data: dataUser,
         });
     })
     .catch((err) => {
@@ -91,7 +99,7 @@ module.exports.createUser = (req, res, next) => {
         next(new IncorrectDataError(err.message));
       }
       if (err.name === 'MongoServerError' && err.code === 11000) {
-        next(new IncorrectDataError('Пользователь с таким e-mail уже существует'));
+        next(new ConflictError('Пользователь с таким e-mail уже существует'));
       }
       next(err);
     });
@@ -184,7 +192,7 @@ module.exports.login = (req, res, next) => {
           return res
             // отправляем jwt в cookie для защиты от XSS-атаки.
             .cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true })
-            .end();
+            .send({ message: 'Вход совершен успешно' });
         })
         .catch(next);
     })

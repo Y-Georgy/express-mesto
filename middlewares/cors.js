@@ -9,6 +9,7 @@ module.exports = (req, res, next) => {
     'https://praktikum.tk',
     'http://praktikum.tk',
     'localhost:3000',
+    'http://mesto-georgy.nomoredomains.work',
   ];
   // Значение для заголовка Access-Control-Allow-Methods по умолчанию (разрешены все типы запросов)
   const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';

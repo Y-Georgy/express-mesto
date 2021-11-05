@@ -3,22 +3,36 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const { celebrate, Joi } = require('celebrate'); // валидация приходящих данных
 const { errors } = require('celebrate'); // для обработки ошибок joi, celebrate
+const cors = require('cors'); // пакет node.js
 const router = require('./routes');
 const auth = require('./middlewares/auth');
-const cors = require('./middlewares/cors');
 const centralizedErrors = require('./middlewares/centralizedErrors');
 const { isValidUrl } = require('./utils/methods');
 
 const { createUser, login } = require('./controllers/users');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3001 } = process.env;
 const app = express();
 
 // для подключения к БД
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
 // Безопасность. Обработка CORS запросов
-app.use(cors);
+const options = {
+  origin: [
+    'http://localhost:3000',
+    'http://mesto-georgy.nomoredomains.work',
+    // 'https://ВАШ ДОМЕЙН С ДОКУМЕНТА',
+    // 'https://YOUR.github.io',
+  ],
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+  allowedHeaders: ['Content-Type', 'origin', 'Authorization'],
+  credentials: true,
+};
+
+app.use('*', cors(options)); // ПЕРВЫМ!
 
 app.use(cookieParser());
 app.use(express.json());
